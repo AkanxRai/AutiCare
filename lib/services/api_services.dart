@@ -1,42 +1,38 @@
 import 'dart:convert';
-import 'package:auticare/constant/api_constant.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:auticare/constant/api_constant.dart';
 
 class GoogleApiService {
-  static String apiKey = ApiConstant.apiKey;
   static String baseUrl = ApiConstant.baseUrl;
+  static String apiKey = ApiConstant.apiKey;
 
-  static Future<String> getApiResponse(String message) async {
+  static Future<String> getApiResponse(String userMessage) async {
     try {
+      final url = Uri.parse("$baseUrl$apiKey");
+
       final response = await http.post(
-        Uri.parse("$baseUrl$apiKey"),
+        url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "contents": [
-            {
-              "parts": [
-                {"text": message}
-              ]
-            }
-          ]
-        }),
+        body: jsonEncode({"user_input": userMessage.trim()}),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data.containsKey("candidates") &&
-            data["candidates"].isNotEmpty &&
-            data["candidates"][0]["content"]["parts"].isNotEmpty) {
-          return data["candidates"][0]["content"]["parts"][0]["text"] ??
-              "AI response was empty.";
+
+        if (data.containsKey("message")) {
+          return data["message"];
+        } else if (data.containsKey("question")) {
+          return data["question"];
+        } else if (data.containsKey("error")) {
+          return "API Error: ${data["error"]}";
+        } else {
+          return "Unexpected response format: $data";
         }
-        return "AI did not return any content.";
       } else {
-        return "Error: ${response.statusCode} - ${response.body}";
+        return "HTTP ${response.statusCode} - ${response.body}";
       }
     } catch (e) {
-      return "Error: $e";
+      return "Exception: $e";
     }
   }
 }

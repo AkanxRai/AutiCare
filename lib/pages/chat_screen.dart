@@ -59,7 +59,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         BubbleSpecialTwo(
                           isSender: isUser,
                           color: isUser ? Colors.blue : const Color(0XFFE5E5E5),
-                          seen: true,
                           text: message['text'],
                           tail: true,
                           textStyle: const TextStyle(
@@ -78,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               color: Color(0XFF808080),
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   );
