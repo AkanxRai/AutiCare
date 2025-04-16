@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:lottie/lottie.dart'; // Import the Lottie package
 import '../controllers/message_controller.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -39,50 +40,68 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: Obx(
-              () => ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16.0),
-                itemCount: chatMessageController.messages.length,
-                itemBuilder: (context, index) {
-                  final message = chatMessageController.messages[index];
-                  final isUser = message['isUser'];
-                  final time = message['time'];
-
-                  return Align(
-                    alignment:
-                        isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Column(
-                      crossAxisAlignment: isUser
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        BubbleSpecialTwo(
-                          isSender: isUser,
-                          color: isUser ? Colors.blue : const Color(0XFFE5E5E5),
-                          text: message['text'],
-                          tail: true,
-                          textStyle: const TextStyle(
-                            fontSize: 14.0,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              right: 10, left: 20, top: 4, bottom: 10),
-                          child: Text(
-                            time,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Color(0XFF808080),
-                            ),
-                          ),
-                        ),
-                      ],
+              () {
+                if (chatMessageController.messages.isEmpty) {
+                  // Display Lottie animation when no messages are present
+                  return Center(
+                    child: Lottie.asset(
+                      'assets/lottie/Animation - 1744829053428.json',
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.contain,
                     ),
                   );
-                },
-              ),
+                } else {
+                  // Display chat messages
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: chatMessageController.messages.length,
+                    itemBuilder: (context, index) {
+                      final message = chatMessageController.messages[index];
+                      final isUser = message['isUser'];
+                      final time = message['time'];
+
+                      return Align(
+                        alignment: isUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: isUser
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            BubbleSpecialTwo(
+                              isSender: isUser,
+                              color: isUser
+                                  ? Colors.blue
+                                  : const Color(0XFFE5E5E5),
+                              text: message['text'],
+                              tail: true,
+                              textStyle: const TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  right: 10, left: 20, top: 4, bottom: 10),
+                              child: Text(
+                                time,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Color(0XFF808080),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
             ),
           ),
           Obx(
