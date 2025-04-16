@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "349452993481",
+    "project_id": "auticare-10677",
+    "storage_bucket": "auticare-10677.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349452993481:android:7f06b6f160cc90856c5e18",
+        "android_client_info": {
+          "package_name": "com.example.auticare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAo6x596ESJWVodpzChKM2cZbmu39LHniM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
