@@ -45,7 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   // Display Lottie animation when no messages are present
                   return Center(
                     child: Lottie.asset(
-                      'assets/lottie/Animation - 1744829053428.json',
+                      'assets/lottie/chat_screen_bot.json',
                       width: 200,
                       height: 200,
                       fit: BoxFit.contain,
@@ -104,35 +104,78 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
+          // Typing indicator
           Obx(
-            () => chatMessageController.isTypeing.value
-                ? const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          height: 30,
-                          width: 40,
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                  radius: 3, backgroundColor: Colors.grey),
-                              SizedBox(width: 4),
-                              CircleAvatar(
-                                  radius: 3, backgroundColor: Colors.grey),
-                              SizedBox(width: 4),
-                              CircleAvatar(
-                                  radius: 3, backgroundColor: Colors.grey),
-                            ],
-                          ),
+            () {
+              if (chatMessageController.isTypeing.value) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 10),
+                      const Text(
+                        "AutiCare is typing",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
                         ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
+                      ),
+                      const SizedBox(width: 10),
+                      Lottie.asset(
+                        'assets/lottie/typing.json', // Replace with your typing indicator animation
+                        width: 50,
+                        height: 50,
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
           ),
+          // Buttons for "Yes," "No," and "Not Applicable"
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    chatMessageController.sendMessage("Yes");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("Yes"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    chatMessageController.sendMessage("No");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("No"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    chatMessageController.sendMessage("Not Applicable");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("Not Applicable"),
+                ),
+              ],
+            ),
+          ),
+          // Text field for manual input
+          Padding(
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               children: [
                 Expanded(
