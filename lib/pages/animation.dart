@@ -1,17 +1,17 @@
 import 'dart:async';
+import 'package:auticare/pages/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'chatbot_page.dart';
 import 'get_started.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class AnimationLoading extends StatefulWidget {
+  const AnimationLoading({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<AnimationLoading> createState() => _AnimationLoadingState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _AnimationLoadingState extends State<AnimationLoading> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         // ✅ Go to chatbot if logged in
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ChatbotPage()),
+          MaterialPageRoute(builder: (context) => const ChatScreen()),
         );
       } else {
         // ❌ Go to onboarding if not

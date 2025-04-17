@@ -1,7 +1,9 @@
+import 'package:auticare/pages/animation.dart';
+import 'package:auticare/pages/chat_screen.dart';
+import 'package:auticare/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'sign_in_page.dart';
-import 'chatbot_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -75,7 +77,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text("Create your account by filling the form below."),
+                        const Text(
+                            "Create your account by filling the form below."),
                         const SizedBox(height: 20),
                         TextField(
                           controller: _emailController,
@@ -99,7 +102,9 @@ class _SignUpPageState extends State<SignUpPage> {
                             fillColor: Colors.grey[200],
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscureText ? Icons.visibility_off : Icons.visibility,
+                                _obscureText
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -142,7 +147,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => const ChatbotPage()),
+                                    builder: (_) => const HomePage()),
                               );
                             } on FirebaseAuthException catch (e) {
                               showError(e.message ?? 'Sign Up Failed');

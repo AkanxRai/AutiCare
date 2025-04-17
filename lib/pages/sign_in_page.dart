@@ -1,5 +1,7 @@
 // sign_in_page.dart
-import 'package:auticare/pages/chatbot_page.dart';
+import 'package:auticare/pages/animation.dart';
+import 'package:auticare/pages/chat_screen.dart';
+import 'package:auticare/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'sign_up_page.dart';
@@ -110,7 +112,7 @@ class _SignInPageState extends State<SignInPage> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const ChatbotPage()),
+                                    builder: (context) => const HomePage()),
                               );
                             } on FirebaseAuthException catch (e) {
                               // Show error
