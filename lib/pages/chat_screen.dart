@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
-import 'package:lottie/lottie.dart'; // Import the Lottie package
+import 'package:lottie/lottie.dart'; 
 import '../controllers/message_controller.dart';
 
 class ChatScreen extends StatefulWidget {
