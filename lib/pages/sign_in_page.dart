@@ -1,6 +1,5 @@
 // sign_in_page.dart
-import 'package:auticare/pages/animation.dart';
-import 'package:auticare/pages/chat_screen.dart';
+
 import 'package:auticare/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

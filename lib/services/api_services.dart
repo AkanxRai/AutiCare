@@ -3,12 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:auticare/constant/api_constant.dart';
 
 class GoogleApiService {
-  static String baseUrl = ApiConstant.baseUrl;
-  static String apiKey = ApiConstant.apiKey;
-
   static Future<String> getApiResponse(String userMessage) async {
     try {
-      final url = Uri.parse("$baseUrl$apiKey");
+      final url = Uri.parse("${ApiConstant.baseUrl}${ApiConstant.apiKey}");
+      print("URL: $url");
+      print("User Message: $userMessage");
 
       final response = await http.post(
         url,

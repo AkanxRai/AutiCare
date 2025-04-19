@@ -56,15 +56,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
               children: [
                 buildPage(
                   "Find trusted doctors near you with AutiCare's help.",
-                  "assets/doctor1.json",
+                  "assets/lottie/doctor1.json",
                 ),
                 buildPage(
                   "Answer a few questions to predict your child's autism potential with AutiCare.",
-                  "assets/doctor2.json",
+                  "assets/lottie/doctor2.json",
                 ),
                 buildPage(
                   "We are here to support you at every step of the journey.",
-                  "assets/doctor3.json",
+                  "assets/lottie/doctor3.json",
                 ),
               ],
             ),

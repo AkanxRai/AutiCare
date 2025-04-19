@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
-import 'package:lottie/lottie.dart'; 
+import 'package:lottie/lottie.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../controllers/message_controller.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -15,10 +16,18 @@ class _ChatScreenState extends State<ChatScreen> {
   final MessageController chatMessageController = Get.put(MessageController());
   final TextEditingController messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  String? displayName;
 
   @override
   void initState() {
     super.initState();
+    // Fetch the display name of the logged-in user
+    final user = FirebaseAuth.instance.currentUser;
+    displayName = user?.displayName ?? "User";
+
+    // Clear previous chats when a new user logs in
+    chatMessageController.clearMessages();
+
     chatMessageController.messages.listen((_) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -43,13 +52,25 @@ class _ChatScreenState extends State<ChatScreen> {
               () {
                 if (chatMessageController.messages.isEmpty) {
                   // Display Lottie animation when no messages are present
-                  return Center(
-                    child: Lottie.asset(
-                      'assets/lottie/chat_screen_bot.json',
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Lottie.asset(
+                        'assets/lottie/chat_screen_bot.json',
+                        width: 200,
+                        height: 200,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Hi, $displayName!",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   );
                 } else {
                   // Display chat messages
@@ -134,89 +155,111 @@ class _ChatScreenState extends State<ChatScreen> {
               }
             },
           ),
-          // Buttons for "Yes," "No," and "Not Applicable"
-          // hello
+          // Buttons for "Yes," "No," "Not Applicable," and "Restart"
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    chatMessageController.sendMessage("Yes");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+            child: Obx(
+              () => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: chatMessageController.isTypeing.value
+                        ? null
+                        : () {
+                            chatMessageController.sendMessage("Yes");
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text("Yes"),
                   ),
-                  child: const Text("Yes"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    chatMessageController.sendMessage("No");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                  ElevatedButton(
+                    onPressed: chatMessageController.isTypeing.value
+                        ? null
+                        : () {
+                            chatMessageController.sendMessage("No");
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text("No"),
                   ),
-                  child: const Text("No"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    chatMessageController.sendMessage("Not Applicable");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                  ElevatedButton(
+                    onPressed: chatMessageController.isTypeing.value
+                        ? null
+                        : () {
+                            chatMessageController.sendMessage("Not Applicable");
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text("Not Applicable"),
                   ),
-                  child: const Text("Not Applicable"),
-                ),
-              ],
+                  IconButton(
+                    onPressed: chatMessageController.isTypeing.value
+                        ? null
+                        : () {
+                            chatMessageController.restartChat();
+                          },
+                    icon: const Icon(Icons.restart_alt),
+                    color: Colors.blue,
+                    tooltip: "Restart",
+                  ),
+                ],
+              ),
             ),
           ),
           // Text field for manual input
           Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: messageController,
-                    decoration: InputDecoration(
-                      hintText: "Type a message...",
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.grey),
+            child: Obx(
+              () => Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: messageController,
+                      enabled: !chatMessageController.isTypeing.value,
+                      decoration: InputDecoration(
+                        hintText: "Type a message...",
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              const BorderSide(color: Colors.green, width: 2),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            const BorderSide(color: Colors.green, width: 2),
-                      ),
+                      style: const TextStyle(color: Colors.black),
                     ),
-                    style: const TextStyle(color: Colors.black),
                   ),
-                ),
-                const SizedBox(width: 10),
-                FloatingActionButton(
-                  heroTag: "send_button",
-                  onPressed: () {
-                    if (messageController.text.isNotEmpty) {
-                      chatMessageController
-                          .sendMessage(messageController.text.trim());
-                      messageController.clear();
-                    }
-                  },
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  child: const Icon(Icons.send),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  FloatingActionButton(
+                    heroTag: "send_button",
+                    onPressed: chatMessageController.isTypeing.value
+                        ? null
+                        : () {
+                            if (messageController.text.isNotEmpty) {
+                              chatMessageController
+                                  .sendMessage(messageController.text.trim());
+                              messageController.clear();
+                            }
+                          },
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    child: const Icon(Icons.send),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -1,5 +1,3 @@
-import 'package:auticare/pages/animation.dart';
-import 'package:auticare/pages/chat_screen.dart';
 import 'package:auticare/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +13,7 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _displayNameController = TextEditingController();
   bool _obscureText = true;
 
   bool isPasswordValid(String password) {
@@ -81,6 +80,19 @@ class _SignUpPageState extends State<SignUpPage> {
                             "Create your account by filling the form below."),
                         const SizedBox(height: 20),
                         TextField(
+                          controller: _displayNameController,
+                          decoration: InputDecoration(
+                            hintText: "Parent Name",
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
                           controller: _emailController,
                           decoration: InputDecoration(
                             hintText: "Email",
@@ -129,8 +141,15 @@ class _SignUpPageState extends State<SignUpPage> {
                         const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () async {
+                            final displayName =
+                                _displayNameController.text.trim();
                             final email = _emailController.text.trim();
                             final password = _passwordController.text.trim();
+
+                            if (displayName.isEmpty) {
+                              showError("Display Name cannot be empty.");
+                              return;
+                            }
 
                             if (!isPasswordValid(password)) {
                               showError(
@@ -139,11 +158,17 @@ class _SignUpPageState extends State<SignUpPage> {
                             }
 
                             try {
-                              await FirebaseAuth.instance
+                              final userCredential = await FirebaseAuth.instance
                                   .createUserWithEmailAndPassword(
                                 email: email,
                                 password: password,
                               );
+
+                              // Update the display name
+                              await userCredential.user
+                                  ?.updateDisplayName(displayName);
+                              await userCredential.user?.reload();
+
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
