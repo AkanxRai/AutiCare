@@ -69,7 +69,7 @@ class MessageController extends GetxController {
         String steps =
             (reply["next_steps"] as List).map((step) => "• $step").join("\n");
         messages.add({
-          'text': "📝 *Next Steps:*\n$steps",
+          'text': "📝 Next Steps:\n$steps",
           'isUser': false,
           'time': DateFormat('hh:mm a').format(DateTime.now())
         });
@@ -78,7 +78,7 @@ class MessageController extends GetxController {
       if (reply.containsKey("local_resources")) {
         messages.add({
           'text':
-              "📍 *Local Resources:*\n${reply["local_resources"] ?? 'Not available'}",
+              "📍 Local Resources:\n${reply["local_resources"] ?? 'Not available'}",
           'isUser': false,
           'time': DateFormat('hh:mm a').format(DateTime.now())
         });
@@ -87,7 +87,7 @@ class MessageController extends GetxController {
       if (reply.containsKey("self_help_strategies")) {
         messages.add({
           'text':
-              "💡 *Self-Help Strategies:*\n${reply["self_help_strategies"] ?? 'Not available'}",
+              "💡 Self-Help Strategies:\n${reply["self_help_strategies"] ?? 'Not available'}",
           'isUser': false,
           'time': DateFormat('hh:mm a').format(DateTime.now())
         });
