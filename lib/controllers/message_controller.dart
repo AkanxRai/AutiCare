@@ -1,12 +1,26 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
 import 'package:auticare/services/api_services.dart';
 
 class MessageController extends GetxController {
   var responseText = "".obs;
   var messages = <Map<String, dynamic>>[].obs;
   var isTyping = false.obs;
+
+  // Boolean state providers
+  var isQuestionProvider = false.obs;
+  var canBeNotApplicableProvider = false.obs;
+
+  // Observable for tracking the user's UUID
+  var userUuid = "".obs;
+
+  // Method to update the UUID and clear the chat if it changes
+  void updateUserUuid(String newUuid) {
+    if (userUuid.value != newUuid) {
+      userUuid.value = newUuid;
+      clearMessages(); // Clear chat messages for the new user
+    }
+  }
 
   Future<void> sendMessage(String message) async {
     messages.add({
@@ -57,11 +71,24 @@ class MessageController extends GetxController {
       }
 
       if (reply.containsKey("question")) {
+        final question = reply["question"];
         messages.add({
-          'text': reply["question"],
+          'text': question,
           'isUser': false,
           'time': DateFormat('hh:mm a').format(DateTime.now())
         });
+
+        // Update isQuestionProvider
+        isQuestionProvider.value = true;
+
+        // Update canBeNotApplicableProvider
+        const specificNumbers = [2, 6, 8, 14, 15, 18, 20];
+        canBeNotApplicableProvider.value = specificNumbers
+            .any((number) => question.toString().contains(number.toString()));
+      } else {
+        // Reset providers if no question
+        isQuestionProvider.value = false;
+        canBeNotApplicableProvider.value = false;
       }
 
       // Handle special formatting keys

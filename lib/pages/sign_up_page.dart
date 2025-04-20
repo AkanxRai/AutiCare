@@ -15,6 +15,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _displayNameController = TextEditingController();
   bool _obscureText = true;
+  bool _isLoading = false; // Track loading state
 
   bool isPasswordValid(String password) {
     final hasMinLength = password.length >= 8;
@@ -32,188 +33,217 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF6A11CB),
-              Color(0xFF2575FC),
-              Color(0xFFB06AB3),
-            ],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "AutiCare Connect",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                            "Create your account by filling the form below."),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: _displayNameController,
-                          decoration: InputDecoration(
-                            hintText: "Parent Name",
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            hintText: "Email",
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: _obscureText,
-                          decoration: InputDecoration(
-                            hintText: "Password",
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Password must be at least 8 characters and alphanumeric.",
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final displayName =
-                                _displayNameController.text.trim();
-                            final email = _emailController.text.trim();
-                            final password = _passwordController.text.trim();
-
-                            if (displayName.isEmpty) {
-                              showError("Display Name cannot be empty.");
-                              return;
-                            }
-
-                            if (!isPasswordValid(password)) {
-                              showError(
-                                  "Password must be at least 8 characters and include both letters and numbers.");
-                              return;
-                            }
-
-                            try {
-                              final userCredential = await FirebaseAuth.instance
-                                  .createUserWithEmailAndPassword(
-                                email: email,
-                                password: password,
-                              );
-
-                              // Update the display name
-                              await userCredential.user
-                                  ?.updateDisplayName(displayName);
-                              await userCredential.user?.reload();
-
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const HomePage()),
-                              );
-                            } on FirebaseAuthException catch (e) {
-                              showError(e.message ?? 'Sign Up Failed');
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: const Text("Sign Up"),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("Already have an account? "),
-                            GestureDetector(
-                              onTap: () => Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const SignInPage()),
-                              ),
-                              child: const Text(
-                                "Sign In",
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF6A11CB),
+                  Color(0xFF2575FC),
+                  Color(0xFFB06AB3),
                 ],
               ),
             ),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "AutiCare Connect",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                                "Create your account by filling the form below."),
+                            const SizedBox(height: 20),
+                            TextField(
+                              controller: _displayNameController,
+                              decoration: InputDecoration(
+                                hintText: "Parent Name",
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(
+                                hintText: "Email",
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: _obscureText,
+                              decoration: InputDecoration(
+                                hintText: "Password",
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureText
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "Password must be at least 8 characters and alphanumeric.",
+                                style:
+                                    TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+                                      try {
+                                        final displayName =
+                                            _displayNameController.text.trim();
+                                        final email =
+                                            _emailController.text.trim();
+                                        final password =
+                                            _passwordController.text.trim();
+
+                                        if (displayName.isEmpty) {
+                                          showError(
+                                              "Display Name cannot be empty.");
+                                          setState(() {
+                                            _isLoading = false;
+                                          });
+                                          return;
+                                        }
+
+                                        if (!isPasswordValid(password)) {
+                                          showError(
+                                              "Password must be at least 8 characters and include both letters and numbers.");
+                                          setState(() {
+                                            _isLoading = false;
+                                          });
+                                          return;
+                                        }
+
+                                        final userCredential =
+                                            await FirebaseAuth.instance
+                                                .createUserWithEmailAndPassword(
+                                          email: email,
+                                          password: password,
+                                        );
+
+                                        // Update the display name
+                                        await userCredential.user
+                                            ?.updateDisplayName(displayName);
+                                        await userCredential.user?.reload();
+
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) => const HomePage()),
+                                        );
+                                      } on FirebaseAuthException catch (e) {
+                                        showError(
+                                            e.message ?? 'Sign Up Failed');
+                                      } finally {
+                                        setState(() {
+                                          _isLoading = false;
+                                        });
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              child: const Text("Sign Up"),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text("Already have an account? "),
+                                GestureDetector(
+                                  onTap: () => Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => const SignInPage()),
+                                  ),
+                                  child: const Text(
+                                    "Sign In",
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(), // Show loading indicator
+            ),
+        ],
       ),
     );
   }

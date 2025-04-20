@@ -3,18 +3,16 @@ import 'package:get/get.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/message_controller.dart';
-import '../state/auth_state.dart';
 
-class ChatScreen extends ConsumerStatefulWidget {
+class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> {
   final MessageController chatMessageController = Get.put(MessageController());
   final TextEditingController messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -23,6 +21,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Get the current user's UUID and update it in the controller
+    final user = FirebaseAuth.instance.currentUser;
+    chatMessageController.updateUserUuid(user?.uid ?? "guest");
+
+    // Listen for changes in the user's UUID
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      chatMessageController.updateUserUuid(user?.uid ?? "guest");
+    });
+
+    // Scroll to the bottom when new messages are added
     chatMessageController.messages.listen((_) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -38,16 +47,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final uuid = ref.watch(authProvider);
-
-    if (uuid == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
     final user = FirebaseAuth.instance.currentUser;
     displayName = user?.displayName ?? "User";
 
@@ -115,18 +114,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 ),
                               ),
                             ),
-                            if (message.containsKey('additionalInfo'))
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 8.0, left: 20.0, right: 10.0),
-                                child: Text(
-                                  message['additionalInfo'],
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
                             Padding(
                               padding: const EdgeInsets.only(
                                   right: 10, left: 20, top: 2, bottom: 10),
@@ -156,7 +143,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     children: [
                       const SizedBox(width: 10),
                       const Text(
-                        "AutiCare is typing",
+                        "AutiCare is typing...",
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -164,7 +151,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       const SizedBox(width: 10),
                       Lottie.asset(
-                        'assets/lottie/typing.json',
+                        'assets/lottie/typing.json', // Replace with your typing animation asset
                         width: 50,
                         height: 50,
                       ),
@@ -176,61 +163,79 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               }
             },
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: chatMessageController.isTyping.value
-                        ? null
-                        : () {
-                            chatMessageController.sendMessage("Yes");
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text("Yes"),
+          Obx(
+            () {
+              if (chatMessageController.isQuestionProvider.value) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  child: Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: chatMessageController.isTyping.value
+                            ? null
+                            : () {
+                                chatMessageController.sendMessage("Yes");
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text("Yes"),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: chatMessageController.isTyping.value
+                            ? null
+                            : () {
+                                chatMessageController.sendMessage("No");
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text("No"),
+                      ),
+                      if (chatMessageController
+                          .canBeNotApplicableProvider.value)
+                        const SizedBox(width: 8),
+                      if (chatMessageController
+                          .canBeNotApplicableProvider.value)
+                        ElevatedButton(
+                          onPressed: chatMessageController.isTyping.value
+                              ? null
+                              : () {
+                                  chatMessageController
+                                      .sendMessage("Not Applicable");
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text("Not Applicable"),
+                        ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            onPressed: chatMessageController.isTyping.value
+                                ? null
+                                : () {
+                                    chatMessageController.restartChat();
+                                  },
+                            icon: const Icon(Icons.restart_alt),
+                            color: Colors.blue,
+                            tooltip: "Restart",
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: chatMessageController.isTyping.value
-                        ? null
-                        : () {
-                            chatMessageController.sendMessage("No");
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text("No"),
-                  ),
-                  ElevatedButton(
-                    onPressed: chatMessageController.isTyping.value
-                        ? null
-                        : () {
-                            chatMessageController.sendMessage("Not Applicable");
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text("Not Applicable"),
-                  ),
-                  IconButton(
-                    onPressed: chatMessageController.isTyping.value
-                        ? null
-                        : () {
-                            chatMessageController.restartChat();
-                          },
-                    icon: const Icon(Icons.restart_alt),
-                    color: Colors.blue,
-                    tooltip: "Restart",
-                  ),
-                ],
-              ),
-            ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
           ),
           Padding(
             padding: const EdgeInsets.all(10.0),
