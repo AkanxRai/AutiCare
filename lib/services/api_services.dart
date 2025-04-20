@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:auticare/constant/api_constant.dart';
 
 class GoogleApiService {
-  static Future<String> getApiResponse(String userMessage) async {
+  static Future<Map<String, dynamic>> getApiResponse(String userMessage) async {
     try {
       final url = Uri.parse("${ApiConstant.baseUrl}${ApiConstant.apiKey}");
       print("URL: $url");
@@ -17,21 +17,12 @@ class GoogleApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
-        if (data.containsKey("message")) {
-          return data["message"];
-        } else if (data.containsKey("question")) {
-          return data["question"];
-        } else if (data.containsKey("error")) {
-          return "API Error: ${data["error"]}";
-        } else {
-          return "Unexpected response format: $data";
-        }
+        return data; // Return the entire response as a Map
       } else {
-        return "HTTP ${response.statusCode} - ${response.body}";
+        return {"error": "HTTP ${response.statusCode} - ${response.body}"};
       }
     } catch (e) {
-      return "Exception: $e";
+      return {"error": "Exception: $e"};
     }
   }
 }

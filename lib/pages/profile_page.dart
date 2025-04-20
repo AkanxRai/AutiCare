@@ -50,13 +50,17 @@ class _ProfilePageState extends State<ProfilePage> {
   void _logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut(); // Sign out from Firebase
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SignInPage()),
-      ); // Navigate to login page
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const SignInPage()),
+        ); // Navigate to login page
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error logging out: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error logging out: $e")),
+        );
+      }
     }
   }
 

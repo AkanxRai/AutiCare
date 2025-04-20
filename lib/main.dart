@@ -2,11 +2,12 @@ import 'package:auticare/firebase_options.dart';
 import 'package:auticare/pages/home_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp())); // Wrap MyApp with ProviderScope
 }
 
 class MyApp extends StatelessWidget {
@@ -30,12 +31,12 @@ class MyApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue, 
-            foregroundColor: Colors.white, 
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
           ),
         ),
       ),
-      home: const HomePage(), 
+      home: const HomePage(),
     );
   }
 }
