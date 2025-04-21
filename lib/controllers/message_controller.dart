@@ -14,11 +14,15 @@ class MessageController extends GetxController {
   // Observable for tracking the user's UUID
   var userUuid = "".obs;
 
+  // Counter for questions
+  var questionCounter = 0.obs;
+
   // Method to update the UUID and clear the chat if it changes
   void updateUserUuid(String newUuid) {
     if (userUuid.value != newUuid) {
       userUuid.value = newUuid;
       clearMessages(); // Clear chat messages for the new user
+      questionCounter.value = 0; // Reset the question counter for the new user
     }
   }
 
@@ -71,6 +75,9 @@ class MessageController extends GetxController {
       }
 
       if (reply.containsKey("question")) {
+        // Increment the counter first
+        questionCounter.value++;
+
         final question = reply["question"];
         messages.add({
           'text': question,
@@ -78,13 +85,12 @@ class MessageController extends GetxController {
           'time': DateFormat('hh:mm a').format(DateTime.now())
         });
 
-        // Update isQuestionProvider
         isQuestionProvider.value = true;
 
-        // Update canBeNotApplicableProvider
-        const specificNumbers = [2, 6, 8, 14, 15, 18, 20];
-        canBeNotApplicableProvider.value = specificNumbers
-            .any((number) => question.toString().contains(number.toString()));
+        // Apply new logic
+        const specificNumbers = [2, 6, 8, 14, 15, 18, 19, 20];
+        canBeNotApplicableProvider.value =
+            specificNumbers.contains(questionCounter.value);
       } else {
         // Reset providers if no question
         isQuestionProvider.value = false;
@@ -178,6 +184,7 @@ class MessageController extends GetxController {
 
   void restartChat() {
     clearMessages();
+    questionCounter.value = 0; // Reset back to 0
     sendMessage("Restart");
   }
 }

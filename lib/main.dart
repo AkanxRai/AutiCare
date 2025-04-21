@@ -1,4 +1,5 @@
 import 'package:auticare/firebase_options.dart';
+import 'package:auticare/pages/animation.dart';
 import 'package:auticare/pages/get_started.dart';
 import 'package:auticare/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -59,8 +60,8 @@ class AuthWrapper extends StatelessWidget {
           // User is logged in, show HomePage
           return const HomePage();
         } else {
-          // User is not logged in, show LoginPage
-          return const OnboardingPage();
+          // User is not logged in, show AnimationLoading
+          return const AnimationLoading(); // Updated comment for clarity
         }
       },
     );

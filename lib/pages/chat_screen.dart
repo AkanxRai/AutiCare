@@ -165,11 +165,11 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Obx(
             () {
-              if (chatMessageController.isQuestionProvider.value) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: Row(
-                    children: [
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: Row(
+                  children: [
+                    if (chatMessageController.isQuestionProvider.value)
                       ElevatedButton(
                         onPressed: chatMessageController.isTyping.value
                             ? null
@@ -182,7 +182,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: const Text("Yes"),
                       ),
+                    if (chatMessageController.isQuestionProvider.value)
                       const SizedBox(width: 8),
+                    if (chatMessageController.isQuestionProvider.value)
                       ElevatedButton(
                         onPressed: chatMessageController.isTyping.value
                             ? null
@@ -195,46 +197,43 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         child: const Text("No"),
                       ),
-                      if (chatMessageController
-                          .canBeNotApplicableProvider.value)
-                        const SizedBox(width: 8),
-                      if (chatMessageController
-                          .canBeNotApplicableProvider.value)
-                        ElevatedButton(
+                    if (chatMessageController.isQuestionProvider.value &&
+                        chatMessageController.canBeNotApplicableProvider.value)
+                      const SizedBox(width: 8),
+                    if (chatMessageController.isQuestionProvider.value &&
+                        chatMessageController.canBeNotApplicableProvider.value)
+                      ElevatedButton(
+                        onPressed: chatMessageController.isTyping.value
+                            ? null
+                            : () {
+                                chatMessageController
+                                    .sendMessage("Not Applicable");
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text("Not Applicable"),
+                      ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
                           onPressed: chatMessageController.isTyping.value
                               ? null
                               : () {
-                                  chatMessageController
-                                      .sendMessage("Not Applicable");
+                                  chatMessageController.restartChat();
                                 },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text("Not Applicable"),
-                        ),
-                      const SizedBox(width: 5),
-                      Flexible(
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            onPressed: chatMessageController.isTyping.value
-                                ? null
-                                : () {
-                                    chatMessageController.restartChat();
-                                  },
-                            icon: const Icon(Icons.restart_alt),
-                            color: Colors.blue,
-                            tooltip: "Restart",
-                          ),
+                          icon: const Icon(Icons.restart_alt),
+                          color: Colors.blue,
+                          tooltip: "Restart",
                         ),
                       ),
-                    ],
-                  ),
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
+                    ),
+                  ],
+                ),
+              );
             },
           ),
           Padding(
