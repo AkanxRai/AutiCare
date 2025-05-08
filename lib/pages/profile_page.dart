@@ -1,6 +1,8 @@
 import 'package:auticare/pages/sign_in_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -12,12 +14,14 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   User? user;
   bool isLoading = true; // Track loading state
+  List<Map<String, dynamic>> predictions = []; // Store predictions
 
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
     _assignRandomAvatarIfNeeded();
+    _fetchPredictions();
   }
 
   Future<void> _assignRandomAvatarIfNeeded() async {
@@ -44,6 +48,30 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         isLoading = false; // Stop loading if photoURL already exists
       });
+    }
+  }
+
+  Future<void> _fetchPredictions() async {
+    if (user != null) {
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .collection('predictions')
+            .orderBy('timestamp', descending: true)
+            .get();
+
+        setState(() {
+          predictions = snapshot.docs
+              .map((doc) => {
+                    'prediction': doc['prediction'],
+                    'timestamp': doc['timestamp']?.toDate(),
+                  })
+              .toList();
+        });
+      } catch (e) {
+        debugPrint("Error fetching predictions: $e");
+      }
     }
   }
 
@@ -143,14 +171,14 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 20),
 
-          // Profile Details Section
+          // Predictions Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Account Details",
+                  "Predictions",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -158,27 +186,35 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.person, color: Colors.blue),
-                    const SizedBox(width: 10),
-                    Text(
-                      user?.displayName ?? "Not Set",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.email, color: Colors.blue),
-                    const SizedBox(width: 10),
-                    Text(
-                      user?.email ?? "Not Set",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
+                predictions.isEmpty
+                    ? const Text(
+                        "No predictions available.",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: predictions.length,
+                        itemBuilder: (context, index) {
+                          final prediction = predictions[index];
+                          return ListTile(
+                            leading:
+                                const Icon(Icons.analytics, color: Colors.blue),
+                            title: Text(
+                              prediction['prediction'] ?? "Unknown",
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            subtitle: Text(
+                              prediction['timestamp'] != null
+                                  ? DateFormat('yyyy-MM-dd HH:mm:ss')
+                                      .format(prediction['timestamp'])
+                                  : "Unknown time",
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
+                            ),
+                          );
+                        },
+                      ),
               ],
             ),
           ),

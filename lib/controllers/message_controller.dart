@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:auticare/services/api_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MessageController extends GetxController {
   var responseText = "".obs;
@@ -40,13 +42,27 @@ class MessageController extends GetxController {
       Map<String, dynamic> reply =
           await GoogleApiService.getApiResponse(message);
 
-      // Display "prediction" if present
+      // Store prediction in Firebase if present
       if (reply.containsKey("prediction")) {
+        final prediction = reply["prediction"];
         messages.add({
-          'text': "Prediction: ${reply["prediction"]}",
+          'text': "Prediction: $prediction",
           'isUser': false,
           'time': DateFormat('hh:mm a').format(DateTime.now())
         });
+
+        // Save prediction to Firebase
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('predictions')
+              .add({
+            'prediction': prediction,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
+        }
       }
 
       // Session expired handling
