@@ -42,26 +42,37 @@ class MessageController extends GetxController {
       Map<String, dynamic> reply =
           await GoogleApiService.getApiResponse(message);
 
-      // Store prediction in Firebase if present
+      // Check if prediction exists and store it only once
       if (reply.containsKey("prediction")) {
         final prediction = reply["prediction"];
+
+        // Add prediction to messages
         messages.add({
           'text': "Prediction: $prediction",
           'isUser': false,
           'time': DateFormat('hh:mm a').format(DateTime.now())
         });
 
-        // Save prediction to Firebase
+        // Save prediction to Firebase only once
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {
-          await FirebaseFirestore.instance
+          final predictionsCollection = FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .collection('predictions')
-              .add({
-            'prediction': prediction,
-            'timestamp': FieldValue.serverTimestamp(),
-          });
+              .collection('predictions');
+
+          // Check if the prediction already exists
+          final existingPrediction = await predictionsCollection
+              .where('prediction', isEqualTo: prediction)
+              .limit(1)
+              .get();
+
+          if (existingPrediction.docs.isEmpty) {
+            await predictionsCollection.add({
+              'prediction': prediction,
+              'timestamp': FieldValue.serverTimestamp(),
+            });
+          }
         }
       }
 

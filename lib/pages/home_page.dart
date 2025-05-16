@@ -1,6 +1,7 @@
 import 'package:auticare/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:auticare/pages/chat_screen.dart';
+import 'package:auticare/pages/Fmri_pred.dart'; // Add this import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,6 +16,7 @@ class _HomePageState extends State<HomePage> {
   // List of pages for navigation
   final List<Widget> _pages = [
     const ChatScreen(),
+    const FMRIPredictionPage(), // Add fMRI Prediction page
     const ProfilePage(),
   ];
 
@@ -39,7 +41,10 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          
+          BottomNavigationBarItem(
+            icon: Icon(Icons.science), // Use a science icon for fMRI
+            label: 'fMRI Pred',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
