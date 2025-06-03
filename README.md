@@ -28,37 +28,6 @@ This project is a starting point for a Flutter application. To run the app local
    ```sh
    git clone https://github.com/AkanxRai/AutiCare.git
    cd AutiCare
-```markdown name=README.md
-# AutiCare
-
-AutiCare is a cross-platform Flutter application designed to assist in the early prediction and support for Autism Spectrum Disorder (ASD) using both behavioral questionnaires and clinical fMRI scans. The app aims to bridge the gap between behavioral symptom detection and clinical neuroscience, providing a comprehensive tool for users, caregivers, and clinicians.
-
-## Features
-
-- **Behavioral Symptom Assessment:**  
-  Users can complete standardized questionnaires to detect behavioral symptoms related to autism.
-
-- **fMRI Scan Upload and Prediction:**  
-  The app allows users to upload fMRI brain scan files (`.nii.gz` format). By analyzing these scans, AutiCare provides clinical predictions that enhance the accuracy beyond behavioral assessments.
-
-- **Cloud Integration:**  
-  Leveraging Firebase Firestore and Storage, user data and predictions are securely stored and managed.
-
-- **Cross-Platform Support:**  
-  Built with Flutter, AutiCare runs on Android, iOS, Windows, Linux, and the web.
-
-## Why fMRI?
-
-While questionnaires are effective in detecting behavioral aspects, fMRI scans offer clinical insight into brain structure and activity patterns, enabling more accurate identification and prediction of autism traits.
-
-## Getting Started
-
-This project is a starting point for a Flutter application. To run the app locally:
-
-1. **Clone the Repository:**
-   ```sh
-   git clone https://github.com/AkanxRai/AutiCare.git
-   cd AutiCare
    ```
 
 2. **Install Dependencies:**
@@ -95,4 +64,3 @@ Contributions are welcome! Please open issues or submit pull requests for new fe
 ## License
 
 This project is licensed under the MIT License.
-```
